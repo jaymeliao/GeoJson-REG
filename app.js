@@ -9,6 +9,8 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({
     extended: true
 }));
+
+const session = require("express-session");
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, {useNewUrlParser: true});
 
