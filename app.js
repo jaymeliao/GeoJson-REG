@@ -4,15 +4,31 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const ejs = require("ejs");
 const app = express();
+const session = require("express-session")
+const passport = require("passport")
+const passportLocalMongoose = require("passport-local-mongoose")
 app.use(express.static("public"));
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({
     extended: true
 }));
 
-const session = require("express-session");
+app.use(session({
+  secret: "Your Own Secret.",
+  resave:false,
+  saveUninitialized:false
+}));
+
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+
+
+
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, {useNewUrlParser: true});
+
 
 const UserSchema = new mongoose.Schema({
     firstName: {
@@ -34,11 +50,21 @@ const UserSchema = new mongoose.Schema({
       type: String,
       required: [true, 'Please add a password'],
     },
-  
+
   });
+//HASH AND SALT
+UserSchema.plugin(passportLocalMongoose);
+
+
 const User = new mongoose.model("User", UserSchema);
 
-var accessable=false;
+passport.use(User.createStrategy());
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+
+
+//var accessable=false;
 
 app.get("/", function(req,res) {
     res.render("index",{accessable:accessable});
@@ -60,7 +86,7 @@ app.post("/login", function(req,res) {
                     res.render("index", {accessable: true});
                 }
             }
-        } 
+        }
     })
 })
 
@@ -89,11 +115,18 @@ app.post("/register", function(req,res) {
             }
         } else {
             res.render("index", {accessable: true});
-        }   
+        }
     })
 
 })
-
+/*
+app.post('/register',function(req,res){
+  User.register
+})
+*/
+app.get("/logout",function(req,res){
+    res.render("index", {accessable: false});
+})
 app.get("/addLocation", function(req,res) {
     res.render("addLocation");
 })

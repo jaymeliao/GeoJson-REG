@@ -65,6 +65,11 @@ body.jlogin {
 
 .jrequire_input{
     border-color: red;
-   
+
     color: red;
+}
+
+
+div.preview-images > img {
+  width: 30%;
 }
